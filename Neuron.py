@@ -13,3 +13,10 @@ class Neuron:
 
         #use sigmoid function as activation function
         output=1/(1+exp(-output))
+
+        return output
+    
+#exactly the same as any other neuron, but does not use an activation function
+class OutputNeuron(Neuron):
+    def calculate(self, inputVector):
+        return dot(inputVector,self.weights)
