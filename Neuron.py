@@ -1,5 +1,4 @@
-from numpy import random, dot, exp
-from functools import partial
+from numpy import random, dot
 
 class Neuron:
     def __init__(self, numberOfWeights, activation):
