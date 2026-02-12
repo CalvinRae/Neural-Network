@@ -1,17 +1,17 @@
 from Neuron import *
 from numpy import exp
 
-def sigmoid(number):
+def sigmoid(number:float)->float:
     return 1/(1+exp(-number))
 
-def ReLU(number):
+def ReLU(number:float)->float:
     if number<0:
         return 0
     else:
         return number
 
 class NeuralNetwork:
-    def __init__(self, structure, activation):
+    def __init__(self, structure:list[int], activation:callable):
         #structure is an array containing the number of neurons in each hidden layer
         #activation is a string naming the activation function
 
@@ -34,7 +34,7 @@ class NeuralNetwork:
         #create 1D array of biases, initialised to zero
         self.biases=[0]*(len(structure)+1)#extra bias for output layer
 
-    def calculate(self, value):
+    def calculate(self, value:float)->float:
         layerValues=[[value, self.biases[0]]]#set the first array to the input vector for the first hidden layer
         for layer in self.layers:
             layerValues.append([])#create new empty array to hold outputs of the current layer
@@ -43,4 +43,4 @@ class NeuralNetwork:
             if len(layerValues)<=len(self.biases):
                 layerValues[len(layerValues)-1].append(self.biases[len(layerValues)-1])#add the bias for the next layer to the array
 
-        return layerValues
+        return layerValues[len(layerValues)-1][0]#returns final output of the single output neuron
