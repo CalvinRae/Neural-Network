@@ -1,4 +1,5 @@
 from Neuron import *
+from numpy import exp
 
 def sigmoid(number):
     return 1/(1+exp(-number))
