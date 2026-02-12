@@ -11,9 +11,10 @@ def ReLU(number:float)->float:
         return number
 
 class NeuralNetwork:
-    def __init__(self, structure:list[int], activation:callable):
+    def __init__(self, structure:list[int], activation:callable, initialBias:float=0):
         #structure is an array containing the number of neurons in each hidden layer
         #activation is a string naming the activation function
+        #initialBias is a float which will be used as the initial value for the bias of each layer
 
         #construct 2D array, with each array containing the neurons for each layer, the last array containing only the output neuron
         self.layers=[[]]
@@ -31,8 +32,8 @@ class NeuralNetwork:
         #add output neuron to the array
         self.layers.append([OutputNeuron(previousLayerSize+1)])
         
-        #create 1D array of biases, initialised to zero
-        self.biases=[0]*(len(structure)+1)#extra bias for output layer
+        #create 1D array of biases
+        self.biases=[initialBias]*(len(structure)+1)#extra bias for output layer
 
     def calculate(self, value:float)->float:
         layerValues=[[value, self.biases[0]]]#set the first array to the input vector for the first hidden layer
