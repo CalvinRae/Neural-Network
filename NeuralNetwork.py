@@ -1,5 +1,6 @@
 from Neuron import *
 from numpy import exp
+from collections.abc import Callable
 
 def sigmoid(number:float)->float:
     return 1/(1+exp(-number))
@@ -11,7 +12,7 @@ def ReLU(number:float)->float:
         return number
 
 class NeuralNetwork:
-    def __init__(self, structure:list[int], activation:callable, initialBias:float=0):
+    def __init__(self, structure:list[int], activation:Callable[[float],float], initialBias:float=0):
         #structure is an array containing the number of neurons in each hidden layer
         #activation is a string naming the activation function
         #initialBias is a float which will be used as the initial value for the bias of each layer
