@@ -10,6 +10,9 @@ def ReLU(number:float)->float:
         return 0
     else:
         return number
+    
+def Linear(number:float)->float:
+    return number
 
 class NeuralNetwork:
     def __init__(self, structure:list[int], activation:Callable[[float],float], initialBias:float=0):
