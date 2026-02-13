@@ -49,3 +49,16 @@ class NeuralNetwork:
                 layerValues[len(layerValues)-1].append(self.biases[len(layerValues)-1])#add the bias for the next layer to the array
 
         return layerValues[len(layerValues)-1][0]#returns final output of the single output neuron
+    
+    def saveWeights(self, filePath:str)->None:
+        file=open(filePath,"w")
+        for layer in self.layers:
+            for neuron in layer:
+                for weight in neuron.weights:
+                    file.write(str(weight))
+                    if weight is not neuron.weights[len(neuron.weights)-1]:#place a comma after every weight but the last one (in between all weights)
+                        file.write(",")
+                if neuron is not layer[len(layer)-1]:
+                    file.write(";")#place a semicolon to separate weights for different neurons
+            if layer is not self.layers[len(self.layers)-1]:
+                file.write("\n")#place a linebreak to separate neurons for different layers
