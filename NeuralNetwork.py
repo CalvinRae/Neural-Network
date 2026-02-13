@@ -62,3 +62,40 @@ class NeuralNetwork:
                     file.write(";")#place a semicolon to separate weights for different neurons
             if layer is not self.layers[len(self.layers)-1]:
                 file.write("\n")#place a linebreak to separate neurons for different layers
+        file.close()
+
+    def loadWeights(self, filePath:str)->None:
+        #read csv
+        file=open(filePath,"r")
+        allWeights=file.read()
+        file.close()
+
+        allWeights=allWeights.split("\n")#separate all weights into layers
+        i=0
+        while i<len(allWeights):
+            allWeights[i]=allWeights[i].split(";")#separate layers into neurons
+            j=0
+            while j<len(allWeights[i]):
+                allWeights[i][j]=allWeights[i][j].split(",")#separate neurons into weights
+                k=0
+                while k<len(allWeights[i][j]):
+                    allWeights[i][j][k]=float(allWeights[i][j][k])
+                    k+=1
+                j+=1
+            i+=1
+
+        #check that the stored weights and this neural network have the same numbers of layers and neurons in each layer
+        sameStructure=True
+        if len(self.layers)!=len(allWeights):#check that number of layers are equal
+            sameStructure=False
+        else:
+            for layer, layerWeights in zip(self.layers,allWeights):
+                if len(layer)!=len(layerWeights):#check that number of neurons in each layer are equal
+                    sameStructure=False
+                    break
+        
+        #set each neuron's weights to the stored weights
+        if sameStructure:
+            for layer, layerWeights in zip(self.layers,allWeights):
+                for neuron, neuronWeights in zip(layer, layerWeights):
+                    neuron.weights=neuronWeights
