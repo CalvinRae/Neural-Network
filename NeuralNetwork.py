@@ -49,28 +49,23 @@ class NeuralNetwork:
         for layerSize in structure:
             if self.layers==[[]]:
                 for i in range(layerSize):
-                    self.layers[0].append(Neuron(2,activation))
+                    self.layers[0].append(Neuron(1,activation,initialBias))
                 previousLayerSize=layerSize
             else:
                 self.layers.append([])
                 for i in range(layerSize):
-                    self.layers[len(self.layers)-1].append(Neuron(previousLayerSize+1,activation))#extra weight for bias
+                    self.layers[len(self.layers)-1].append(Neuron(previousLayerSize,activation,initialBias))#extra weight for bias
                 previousLayerSize=layerSize
 
         #add output neuron to the array
-        self.layers.append([OutputNeuron(previousLayerSize+1)])
-        
-        #create 1D array of biases
-        self.biases=[initialBias]*(len(structure)+1)#extra bias for output layer
+        self.layers.append([OutputNeuron(previousLayerSize,initialBias)])
 
     def calculate(self, value:float)->float:
-        layerValues=[[value, self.biases[0]]]#set the first array to the input vector for the first hidden layer
+        layerValues=[[value]]#set the first array to the input vector for the first hidden layer
         for layer in self.layers:
             layerValues.append([])#create new empty array to hold outputs of the current layer
             for neuron in layer:
                 layerValues[len(layerValues)-1].append(neuron.calculate(layerValues[len(layerValues)-2]))#add each neuron's output to the array
-            if len(layerValues)<=len(self.biases):
-                layerValues[len(layerValues)-1].append(self.biases[len(layerValues)-1])#add the bias for the next layer to the array
 
         return layerValues[len(layerValues)-1][0]#returns final output of the single output neuron
     
