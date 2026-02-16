@@ -60,8 +60,9 @@ class NeuralNetwork:
         #add output neuron to the array
         self.layers.append([OutputNeuron(previousLayerSize,initialBias)])
 
-    def calculate(self, value:float)->float:
-        layerValues=[[value]]#set the first array to the input vector for the first hidden layer
+    def calculate(self, inputVector:list[float])->float:
+        #layerValues is a 2d array of floats; each array in layerValues contains the output of each neuron from that layer
+        layerValues=[inputVector]#set the first array to the input vector for the first hidden layer, i.e. the outputs of the input neurons
         for layer in self.layers:
             layerValues.append([])#create new empty array to hold outputs of the current layer
             for neuron in layer:
