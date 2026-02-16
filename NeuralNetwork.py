@@ -14,6 +14,18 @@ def ReLU(number:float)->float:
 def Linear(number:float)->float:
     return number
 
+def sigmoidDerivative(number:float)->float:
+    return sigmoid(number)*(1-sigmoid(number))
+
+def ReLUDerivative(number:float)->float:
+    if number>0:
+        return number
+    else:
+        return 0
+    
+def linearDerivative(number:float | None = None)->float:
+    return 1
+
 class NeuralNetwork:
     def __init__(self, structure:list[int], activation:Callable[[float],float], initialBias:float=0):
         #structure is an array containing the number of neurons in each hidden layer
