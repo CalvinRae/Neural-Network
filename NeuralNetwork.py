@@ -44,7 +44,7 @@ class NeuralNetwork:
         #activation is a string naming the activation function
         #initialBias is a float which will be used as the initial value for the bias of each layer
 
-        #construct 2D array, with each array containing the neurons for each layer, the last array containing only the output neuron
+        #construct 2D array, with each array containing the neurons for each layer, the last array containing only the output neurons
         self.layers=[]
         index=1#do not create neurons for the input neurons, the input will be passed as a list to the calculate method
         while index<=len(structure)-1:
@@ -57,7 +57,7 @@ class NeuralNetwork:
                     self.layers[len(self.layers)-1].append(OutputNeuron(structure[index-1],initialBias))
             index+=1
 
-    def calculate(self, inputVector:list[float])->float:
+    def calculateAll(self, inputVector:list[float])->float:
         #layerValues is a 2d array of floats; each array in layerValues contains the output of each neuron from that layer
         layerValues=[inputVector]#set the first array to the input vector for the first hidden layer, i.e. the outputs of the input neurons
         for layer in self.layers:
@@ -65,7 +65,11 @@ class NeuralNetwork:
             for neuron in layer:
                 layerValues[len(layerValues)-1].append(neuron.calculate(layerValues[len(layerValues)-2]))#add each neuron's output to the array
 
-        return layerValues[len(layerValues)-1]#returns values of the output neurons
+        return layerValues#returns values of all neurons
+    
+    def calculateOutput(self, inputVector:list[float])->float:
+        output = self.calculateAll(inputVector)
+        return output[len(output)-1]#get only the values for the output neurons
     
     def saveWeights(self, filePath:str)->None:
         file=open(filePath,"w")
