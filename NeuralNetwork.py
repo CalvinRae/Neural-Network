@@ -45,20 +45,17 @@ class NeuralNetwork:
         #initialBias is a float which will be used as the initial value for the bias of each layer
 
         #construct 2D array, with each array containing the neurons for each layer, the last array containing only the output neuron
-        self.layers=[[]]
-        for layerSize in structure:
-            if self.layers==[[]]:
-                for i in range(layerSize):
-                    self.layers[0].append(Neuron(1,activation,initialBias))
-                previousLayerSize=layerSize
+        self.layers=[]
+        index=1#do not create neurons for the input neurons, the input will be passed as a list to the calculate method
+        while index<=len(structure)-1:
+            self.layers.append([])
+            if index<len(structure)-1:
+                for i in range(structure[index]):
+                    self.layers[len(self.layers)-1].append(Neuron(structure[index-1],activation,initialBias))
             else:
-                self.layers.append([])
-                for i in range(layerSize):
-                    self.layers[len(self.layers)-1].append(Neuron(previousLayerSize,activation,initialBias))#extra weight for bias
-                previousLayerSize=layerSize
-
-        #add output neuron to the array
-        self.layers.append([OutputNeuron(previousLayerSize,initialBias)])
+                for i in range(structure[index]):
+                    self.layers[len(self.layers)-1].append(OutputNeuron(structure[index-1],initialBias))
+            index+=1
 
     def calculate(self, inputVector:list[float])->float:
         #layerValues is a 2d array of floats; each array in layerValues contains the output of each neuron from that layer
@@ -68,7 +65,7 @@ class NeuralNetwork:
             for neuron in layer:
                 layerValues[len(layerValues)-1].append(neuron.calculate(layerValues[len(layerValues)-2]))#add each neuron's output to the array
 
-        return layerValues[len(layerValues)-1][0]#returns final output of the single output neuron
+        return layerValues[len(layerValues)-1]#returns values of the output neurons
     
     def saveWeights(self, filePath:str)->None:
         file=open(filePath,"w")
@@ -90,6 +87,7 @@ class NeuralNetwork:
         allWeights=file.read()
         file.close()
 
+        #take the string from the file and format it into a useful data structure
         allWeights=allWeights.split("\n")#separate all weights into layers
         i=0
         while i<len(allWeights):
