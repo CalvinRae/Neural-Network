@@ -11,9 +11,6 @@ def ReLU(number:float)->float:
         return 0
     else:
         return number
-    
-def Linear(number:float)->float:
-    return number
 
 def leakyReLU(number:float)->float:
     if number<0:
@@ -29,9 +26,6 @@ def ReLUDerivative(number:float)->float:
         return number
     else:
         return 0
-    
-def linearDerivative(number:float | None = None)->float:
-    return 1
 
 def leakyReLUDerivative(number:float)->float:
     if number<0:
