@@ -17,6 +17,9 @@ def leakyReLU(number:float)->float:
         return 0.01*number
     else:
         return number
+    
+def linear(number:float)->float:
+    return number
 
 def sigmoidDerivative(number:float)->float:
     return sigmoid(number)*(1-sigmoid(number))
