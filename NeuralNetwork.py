@@ -33,7 +33,7 @@ def leakyReLUDerivative(number:float)->float:
     else:
         return 1
     
-def fromCSV(filePath:str, activation:Callable[[float],float])->NeuralNetwork:
+def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float])->NeuralNetwork:
     file=open(filePath,"r")
     storedNN=file.read()
     file.close()
@@ -41,12 +41,12 @@ def fromCSV(filePath:str, activation:Callable[[float],float])->NeuralNetwork:
     structure=[len(storedNN[0].split(";")[0].split(","))-1]
     for layer in storedNN:
         structure.append(len(layer.split(";")))
-    newNN=NeuralNetwork(structure,activation)
+    newNN=NeuralNetwork(structure,hiddenActivation,outputActivation)
     newNN.loadParameters(filePath)
     return newNN
 
 class NeuralNetwork:
-    def __init__(self, structure:list[int], activation:Callable[[float],float], initialBias:float=0):
+    def __init__(self, structure:list[int], hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float], initialBias:float=0):
         #structure is an array containing the number of neurons in each hidden layer
         #activation is a string naming the activation function
         #initialBias is a float which will be used as the initial value for the bias of each layer
@@ -58,10 +58,10 @@ class NeuralNetwork:
             self.layers.append([])
             if index<len(structure)-1:
                 for i in range(structure[index]):
-                    self.layers[len(self.layers)-1].append(Neuron(structure[index-1],activation,initialBias))
+                    self.layers[len(self.layers)-1].append(Neuron(structure[index-1],hiddenActivation,initialBias))
             else:
                 for i in range(structure[index]):
-                    self.layers[len(self.layers)-1].append(OutputNeuron(structure[index-1],initialBias))
+                    self.layers[len(self.layers)-1].append(Neuron(structure[index-1],outputActivation,initialBias))
             index+=1
 
     def calculateAll(self, inputVector:list[float])->float:

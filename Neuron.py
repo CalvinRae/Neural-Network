@@ -22,14 +22,3 @@ class Neuron:
         #use activation function to get the final output
         output=self.activation(output)
         return output
-    
-#exactly the same as any other neuron, but does not use an activation function
-class OutputNeuron(Neuron):
-    def __init__(self, numberOfWeights:int, bias:float):
-        self.bias=bias
-        self.weights=[]
-        for i in range(numberOfWeights):
-            self.weights.append(random.normal(0,1))
-
-    def calculate(self, inputVector:list[float])->float:
-        return dot(inputVector,self.weights)+self.bias
