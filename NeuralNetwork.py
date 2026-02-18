@@ -1,3 +1,4 @@
+from __future__ import annotations
 from Neuron import *
 from numpy import exp
 from collections.abc import Callable
@@ -37,6 +38,18 @@ def leakyReLUDerivative(number:float)->float:
         return 0.01
     else:
         return 1
+    
+def fromCSV(filePath:str, activation:Callable[[float],float])->NeuralNetwork:
+    file=open(filePath,"r")
+    storedNN=file.read()
+    file.close()
+    storedNN=storedNN.split("\n")
+    structure=[len(storedNN[0].split(";")[0].split(","))-1]
+    for layer in storedNN:
+        structure.append(len(layer.split(";")))
+    newNN=NeuralNetwork(structure,activation)
+    newNN.loadParameters(filePath)
+    return newNN
 
 class NeuralNetwork:
     def __init__(self, structure:list[int], activation:Callable[[float],float], initialBias:float=0):
