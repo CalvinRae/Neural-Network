@@ -35,7 +35,7 @@ def sigmoidDerivative(number:float)->float:
 
 def ReLUDerivative(number:float)->float:
     if number>0:
-        return number
+        return 1
     else:
         return 0
 
