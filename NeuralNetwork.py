@@ -3,23 +3,32 @@ from Neuron import *
 from numpy import exp
 from collections.abc import Callable
 
-def sigmoid(number:float)->float:
-    return 1/(1+exp(-number))
+def sigmoid(numbers:list[float])->list[float]:
+    output=[]
+    for number in numbers:
+        output.append(1/(1+exp(-number)))
+    return output
 
-def ReLU(number:float)->float:
-    if number<0:
-        return 0
-    else:
-        return number
+def ReLU(numbers:list[float])->list[float]:
+    output=[]
+    for number in numbers:
+        if number<0:
+            output.append(0)
+        else:
+            output.append(number)
+    return output
 
-def leakyReLU(number:float)->float:
-    if number<0:
-        return 0.01*number
-    else:
-        return number
+def leakyReLU(numbers:list[float])->list[float]:
+    output=[]
+    for number in numbers:
+        if number<0:
+            output.append(0.01*number)
+        else:
+            output.append(number)
+    return output
     
-def linear(number:float)->float:
-    return number
+def linear(numbers:list[float])->list[float]:
+    return numbers
 
 def sigmoidDerivative(number:float)->float:
     return sigmoid(number)*(1-sigmoid(number))
@@ -49,35 +58,37 @@ def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActiva
     return newNN
 
 class NeuralNetwork:
-    def __init__(self, structure:list[int], hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float], initialBias:float=0):
+    def __init__(self, structure:list[int], hiddenActivation:Callable[[list[float]],list[float]], outputActivation:Callable[[list[float]],list[float]], initialBias:float=0):
         #structure is an array containing the number of neurons in each hidden layer
-        #activation is a string naming the activation function
+        #hiddenActivation and outputActivation are callables for the activation functions of the hidden and output layers
         #initialBias is a float which will be used as the initial value for the bias of each layer
+        self.hiddenActivation=hiddenActivation
+        self.outputActivation=outputActivation
 
         #construct 2D array, with each array containing the neurons for each layer, the last array containing only the output neurons
         self.layers=[]
         index=1#do not create neurons for the input neurons, the input will be passed as a list to the calculate method
         while index<=len(structure)-1:
             self.layers.append([])
-            if index<len(structure)-1:
-                for i in range(structure[index]):
-                    self.layers[len(self.layers)-1].append(Neuron(structure[index-1],hiddenActivation,initialBias))
-            else:
-                for i in range(structure[index]):
-                    self.layers[len(self.layers)-1].append(Neuron(structure[index-1],outputActivation,initialBias))
+            for i in range(structure[index]):
+                self.layers[len(self.layers)-1].append(Neuron(structure[index-1],initialBias))
             index+=1
 
-    def calculateAll(self, inputVector:list[float])->float:
+    def calculateAll(self, inputVector:list[float])->list[list[float]]:
         #layerValues is a 2d array of floats; each array in layerValues contains the output of each neuron from that layer
         layerValues=[inputVector]#set the first array to the input vector for the first hidden layer, i.e. the outputs of the input neurons
         for layer in self.layers:
             layerValues.append([])#create new empty array to hold outputs of the current layer
             for neuron in layer:
                 layerValues[len(layerValues)-1].append(neuron.calculate(layerValues[len(layerValues)-2]))#add each neuron's output to the array
+            if layer is not self.layers[len(self.layers)-1]:#if this is not the output layer
+                layerValues[len(layerValues)-1]=self.hiddenActivation(layerValues[len(layerValues)-1])#use the activation for the hidden layers
+            else:
+                layerValues[len(layerValues)-1]=self.outputActivation(layerValues[len(layerValues)-1])#otherwise use the activation for the output layer
 
         return layerValues#returns values of all neurons
     
-    def calculateOutput(self, inputVector:list[float])->float:
+    def calculateOutput(self, inputVector:list[float])->list[float]:
         output = self.calculateAll(inputVector)
         return output[len(output)-1]#get only the values for the output neurons
     
@@ -132,3 +143,9 @@ class NeuralNetwork:
                 for neuron, neuronParameters in zip(layer, layerParameters):
                     neuron.bias=neuronParameters.pop()
                     neuron.weights=neuronParameters
+
+#TODO:
+#-implement softmax function and its derivative
+#NOTE: we will only differentiate the softmax function with respect to the same value that it was originally applied to, so its derivative will always be S(1-S),
+#where S is the output of the softmax function
+#-implement backpropagation, using a depth-first recursive method
