@@ -30,6 +30,15 @@ def leakyReLU(numbers:list[float])->list[float]:
 def linear(numbers:list[float])->list[float]:
     return numbers
 
+def softmax(numbers:list[float])->list[float]:
+    sumExp=0
+    for number in numbers:
+        sumExp+=exp(number)
+    output=[]
+    for number in numbers:
+        output.append(exp(number)/sumExp)
+    return output
+
 def sigmoidDerivative(number:float)->float:
     return sigmoid(number)*(1-sigmoid(number))
 
