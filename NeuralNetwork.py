@@ -154,7 +154,9 @@ class NeuralNetwork:
                     neuron.weights=neuronParameters
 
 #TODO:
-#-implement softmax function and its derivative
-#NOTE: we will only differentiate the softmax function with respect to the same value that it was originally applied to, so its derivative will always be S(1-S),
+#-implement softmax function's derivative
+#-NOTE: we will only differentiate the softmax function with respect to the same value that it was originally applied to, so its derivative will always be S(1-S),
 #where S is the output of the softmax function
-#-implement backpropagation, using a depth-first recursive method
+#-change derivative functions to act on layer outputs rather than single neuron outputs
+#-implement backpropagation, layer by layer, from the output layer backwards
+#-iterate over each hidden layer once for every neuron in the next layer (calculate effect on cost via each neuron)
