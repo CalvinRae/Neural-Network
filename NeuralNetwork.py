@@ -65,6 +65,14 @@ def leakyReLUDerivative(numbers:list[float])->list[float]:
 
 def linearDerivative(numbers:list[float]|None=None)->1:
     return 1
+
+def softmaxDerivative(numbers:list[float])->list[float]:
+    output=softmax(numbers)
+    i=0
+    while i<len(output):
+        output[i]=output[i]*(1-output[i])
+        i+=1
+    return output
     
 def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float])->NeuralNetwork:
     file=open(filePath,"r")
@@ -166,9 +174,5 @@ class NeuralNetwork:
                     neuron.weights=neuronParameters
 
 #TODO:
-#-implement softmax function's derivative
-#-NOTE: we will only differentiate the softmax function with respect to the same value that it was originally applied to, so its derivative will always be S(1-S),
-#where S is the output of the softmax function
-#-change derivative functions to act on layer outputs rather than single neuron outputs
 #-implement backpropagation, layer by layer, from the output layer backwards
 #-iterate over each hidden layer once for every neuron in the next layer (calculate effect on cost via each neuron)
