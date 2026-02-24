@@ -39,20 +39,32 @@ def softmax(numbers:list[float])->list[float]:
         output.append(exp(number)/sumExp)
     return output
 
-def sigmoidDerivative(number:float)->float:
-    return sigmoid(number)*(1-sigmoid(number))
+def sigmoidDerivative(numbers:list[float])->list[float]:
+    output=[]
+    for number in numbers:
+        output.append(sigmoid(number)*(1-sigmoid(number)))
+    return output
 
-def ReLUDerivative(number:float)->float:
-    if number>0:
-        return 1
-    else:
-        return 0
+def ReLUDerivative(numbers:list[float])->list[float]:
+    output=[]
+    for number in numbers:
+        if number>0:
+            output.append(1)
+        else:
+            output.append(0)
+    return output
 
-def leakyReLUDerivative(number:float)->float:
-    if number<0:
-        return 0.01
-    else:
-        return 1
+def leakyReLUDerivative(numbers:list[float])->list[float]:
+    output=[]
+    for number in numbers:
+        if number>0:
+            output.append(1)
+        else:
+            output.append(0.01)
+    return output
+
+def linearDerivative(numbers:list[float]|None=None)->1:
+    return 1
     
 def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float])->NeuralNetwork:
     file=open(filePath,"r")
