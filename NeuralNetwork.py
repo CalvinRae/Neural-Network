@@ -111,16 +111,16 @@ class NeuralNetwork:
         for layer in self.layers:
             initialValues.append([])#create new empty array to hold outputs of the current layer
             for neuron in layer:
-                initialValues[len(initialValues)-1].append(neuron.calculate(initialValues[len(initialValues)-2]))#add each neuron's output to the array
+                initialValues[len(initialValues)-1].append(neuron.calculate(finalValues[len(finalValues)-1]))#add each neuron's output to the array
             if layer is not self.layers[len(self.layers)-1]:#if this is not the output layer
                 finalValues.append(self.hiddenActivation(initialValues[len(initialValues)-1]))#use the activation for the hidden layers
             else:
                 finalValues.append(self.outputActivation(initialValues[len(initialValues)-1]))#otherwise use the activation for the output layer
 
-        return finalValues, initialValues#returns values of all neurons
+        return finalValues, initialValues#returns values of all neurons after and before activation
     
     def calculate(self, inputVector:list[float])->list[float]:
-        output = self.calculateAll(inputVector)[0]
+        output = self.calculateAll(inputVector)[0]#take only the final values, after the activation function
         return output[len(output)-1]#get only the values for the output neurons
     
     def saveParameters(self, filePath:str)->None:
