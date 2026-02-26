@@ -104,21 +104,23 @@ class NeuralNetwork:
             index+=1
 
     def calculateAll(self, inputVector:list[float])->list[list[float]]:
-        #layerValues is a 2d array of floats; each array in layerValues contains the output of each neuron from that layer
-        layerValues=[inputVector]#set the first array to the input vector for the first hidden layer, i.e. the outputs of the input neurons
+        #finalValues is a 2d array of floats; each array in finalValues contains the output of each neuron from that layer
+        #initialValues is similar, but holds the values of each neuron before applying the activation function
+        finalValues=[inputVector]#set the first array to the input vector for the first hidden layer, i.e. the outputs of the input neurons
+        initialValues=[inputVector]#there is no activation function on the input layer, so finalValues=initialValues
         for layer in self.layers:
-            layerValues.append([])#create new empty array to hold outputs of the current layer
+            initialValues.append([])#create new empty array to hold outputs of the current layer
             for neuron in layer:
-                layerValues[len(layerValues)-1].append(neuron.calculate(layerValues[len(layerValues)-2]))#add each neuron's output to the array
+                initialValues[len(initialValues)-1].append(neuron.calculate(initialValues[len(initialValues)-2]))#add each neuron's output to the array
             if layer is not self.layers[len(self.layers)-1]:#if this is not the output layer
-                layerValues[len(layerValues)-1]=self.hiddenActivation(layerValues[len(layerValues)-1])#use the activation for the hidden layers
+                finalValues.append(self.hiddenActivation(initialValues[len(initialValues)-1]))#use the activation for the hidden layers
             else:
-                layerValues[len(layerValues)-1]=self.outputActivation(layerValues[len(layerValues)-1])#otherwise use the activation for the output layer
+                finalValues.append(self.outputActivation(initialValues[len(initialValues)-1]))#otherwise use the activation for the output layer
 
-        return layerValues#returns values of all neurons
+        return finalValues, initialValues#returns values of all neurons
     
-    def calculateOutput(self, inputVector:list[float])->list[float]:
-        output = self.calculateAll(inputVector)
+    def calculate(self, inputVector:list[float])->list[float]:
+        output = self.calculateAll(inputVector)[0]
         return output[len(output)-1]#get only the values for the output neurons
     
     def saveParameters(self, filePath:str)->None:
