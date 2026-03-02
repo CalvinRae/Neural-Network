@@ -68,10 +68,8 @@ def linearDerivative(numbers:list[float]|None=None)->1:
 
 def softmaxDerivative(numbers:list[float])->list[float]:
     output=softmax(numbers)
-    i=0
-    while i<len(output):
+    for i in range(len(output)):
         output[i]=output[i]*(1-output[i])
-        i+=1
     return output
     
 def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float])->NeuralNetwork:
@@ -96,12 +94,11 @@ class NeuralNetwork:
 
         #construct 2D array, with each array containing the neurons for each layer, the last array containing only the output neurons
         self.layers=[]
-        index=1#do not create neurons for the input neurons, the input will be passed as a list to the calculate method
-        while index<=len(structure)-1:
+        #do not create neurons for the input neurons, the input will be passed as a list to the calculate method
+        for i in range(1,len(structure)):
             self.layers.append([])
-            for i in range(structure[index]):
-                self.layers[len(self.layers)-1].append(Neuron(structure[index-1],initialBias))
-            index+=1
+            for j in range(structure[i]):
+                self.layers[len(self.layers)-1].append(Neuron(structure[i],initialBias))
 
     def calculateAll(self, inputVector:list[float])->list[list[float]]:
         #finalValues is a 2d array of floats; each array in finalValues contains the output of each neuron from that layer
@@ -145,18 +142,12 @@ class NeuralNetwork:
 
         #take the string from the file and format it into a useful data structure
         allParameters=allParameters.split("\n")#separate all weights into layers
-        i=0
-        while i<len(allParameters):
+        for i in range(len(allParameters)):
             allParameters[i]=allParameters[i].split(";")#separate layers into neurons
-            j=0
-            while j<len(allParameters[i]):
+            for j in range(len(allParameters[i])):
                 allParameters[i][j]=allParameters[i][j].split(",")#separate neurons into weights and a bias
-                k=0
-                while k<len(allParameters[i][j]):
+                for k in range(len(allParameters[i][j])):
                     allParameters[i][j][k]=float(allParameters[i][j][k])
-                    k+=1
-                j+=1
-            i+=1
 
         #check that the stored parameters and this neural network have the same numbers of layers and neurons in each layer
         sameStructure=True
