@@ -7,6 +7,8 @@ class Neuron:
         #activation is a string naming the activation function
         #bias is the initial bias of the neuron
         self.bias=bias
+        self.weightAdjustments=None
+        self.biasAdjustment=None
         
         #use random weight initialisation, using normal distribution with mean 0, s.d. 1
         self.weights=[]
@@ -19,3 +21,23 @@ class Neuron:
         #add bias
         output += self.bias
         return output
+    
+    def addWeightAdjustments(self,newWeightAdjustments:list[float])->None:
+        if self.weightAdjustments==None:
+            self.weightAdjustments=newWeightAdjustments
+        else:
+            for i in range(self.weightAdjustments):
+                self.weightAdjustments[i]+=newWeightAdjustments[i]
+    
+    def addBiasAdjustment(self,newBiasAdjustment:float)->None:
+        if self.biasAdjustment==None:
+            self.biasAdjustment=newBiasAdjustment
+        else:
+            self.biasAdjustment+=newBiasAdjustment
+
+    def applyAdjustments(self):
+        for i in range(self.weights):
+            self.weights[i]+=self.weightAdjustments[i]
+        self.bias+=self.biasAdjustment
+        self.weightAdjustments=None
+        self.biasAdjustment=None
