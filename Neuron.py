@@ -26,7 +26,7 @@ class Neuron:
         if self.weightAdjustments==None:
             self.weightAdjustments=newWeightAdjustments
         else:
-            for i in range(self.weightAdjustments):
+            for i in range(len(self.weightAdjustments)):
                 self.weightAdjustments[i]+=newWeightAdjustments[i]
     
     def addBiasAdjustment(self,newBiasAdjustment:float)->None:
@@ -35,9 +35,9 @@ class Neuron:
         else:
             self.biasAdjustment+=newBiasAdjustment
 
-    def applyAdjustments(self):
-        for i in range(self.weights):
-            self.weights[i]+=self.weightAdjustments[i]
-        self.bias+=self.biasAdjustment
+    def applyAdjustments(self,count):
+        for i in range(len(self.weights)):
+            self.weights[i]-=self.weightAdjustments[i]/count
+        self.bias-=self.biasAdjustment/count
         self.weightAdjustments=None
         self.biasAdjustment=None

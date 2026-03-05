@@ -42,7 +42,7 @@ def softmax(numbers:list[float])->list[float]:
 def sigmoidDerivative(numbers:list[float])->list[float]:
     output=[]
     for number in numbers:
-        output.append(sigmoid(number)*(1-sigmoid(number)))
+        output.append((1/(1+exp(-number)))*(1-(1/(1+exp(-number)))))
     return output
 
 def ReLUDerivative(numbers:list[float])->list[float]:
@@ -72,7 +72,7 @@ def softmaxDerivative(numbers:list[float])->list[float]:
         output[i]=output[i]*(1-output[i])
     return output
     
-def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float])->NeuralNetwork:
+def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float], diffHidden:Callable[[list[float]],list[float]]|None=None, diffOutput:Callable[[list[float]],list[float]]|None=None)->NeuralNetwork:
     file=open(filePath,"r")
     storedNN=file.read()
     file.close()
@@ -80,17 +80,19 @@ def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActiva
     structure=[len(storedNN[0].split(";")[0].split(","))-1]
     for layer in storedNN:
         structure.append(len(layer.split(";")))
-    newNN=NeuralNetwork(structure,hiddenActivation,outputActivation)
+    newNN=NeuralNetwork(structure,hiddenActivation,outputActivation,diffHidden,diffOutput)
     newNN.loadParameters(filePath)
     return newNN
 
 class NeuralNetwork:
-    def __init__(self, structure:list[int], hiddenActivation:Callable[[list[float]],list[float]], outputActivation:Callable[[list[float]],list[float]], initialBias:float=0):
+    def __init__(self, structure:list[int], hiddenActivation:Callable[[list[float]],list[float]], outputActivation:Callable[[list[float]],list[float]], initialBias:float=0, diffHidden:Callable[[list[float]],list[float]]|None=None, diffOutput:Callable[[list[float]],list[float]]|None=None):
         #structure is an array containing the number of neurons in each hidden layer
         #hiddenActivation and outputActivation are callables for the activation functions of the hidden and output layers
         #initialBias is a float which will be used as the initial value for the bias of each layer
         self.hiddenActivation=hiddenActivation
         self.outputActivation=outputActivation
+        self.diffHidden=diffHidden
+        self.diffOutput=diffOutput
 
         #construct 2D array, with each array containing the neurons for each layer, the last array containing only the output neurons
         self.layers=[]
@@ -98,9 +100,9 @@ class NeuralNetwork:
         for i in range(1,len(structure)):
             self.layers.append([])
             for j in range(structure[i]):
-                self.layers[len(self.layers)-1].append(Neuron(structure[i],initialBias))
+                self.layers[len(self.layers)-1].append(Neuron(structure[i-1],initialBias))
 
-    def calculateAll(self, inputVector:list[float])->list[list[float]]:
+    def calculateAll(self, inputVector:list[float])->tuple[list[list[float]],list[list[float]]]:
         #finalValues is a 2d array of floats; each array in finalValues contains the output of each neuron from that layer
         #initialValues is similar, but holds the values of each neuron before applying the activation function
         finalValues=[inputVector]#set the first array to the input vector for the first hidden layer, i.e. the outputs of the input neurons
@@ -166,6 +168,64 @@ class NeuralNetwork:
                     neuron.bias=neuronParameters.pop()
                     neuron.weights=neuronParameters
 
+    def train(self,inputVector:list[float],expectedOutput:list[float],learningRate:float)->None:
+        activations, initialValues=self.calculateAll(inputVector)
+        self.addAdjustments(activations,initialValues,expectedOutput,learningRate)
+        self.applyAdjustments(1)
+
+    def batchTrain(self,inputVectors:list[list[float]],expectedOutputs:list[list[float]],learningRate:float)->None:
+        for inputVector, expectedOutput in zip(inputVectors,expectedOutputs):
+            activations, initialValues=self.calculateAll(inputVector)
+            self.addAdjustments(activations,initialValues,expectedOutput,learningRate)
+        self.applyAdjustments(len(inputVectors))
+        
+    def addAdjustments(self,activations:list[list[float]],initialValues:list[list[float]],expectedOutput:list[float],learningRate:float)->None:
+        dAdZ=[]#differentiation of each activation function, note that it also includes the input layer
+        for layer in initialValues:
+            if layer is initialValues[len(initialValues)-1]:
+                dAdZ.append(self.diffOutput(layer))
+            elif layer is initialValues[0]:
+                dAdZ.append([1]*len(layer))#because for the input layer, dAdZ=1
+            else:
+                dAdZ.append(self.diffHidden(layer))
+        dCdA=[]
+        for i in range(len(self.layers)):
+            dCdA.append([])
+
+        #add adjustments for the output layer
+        for i in range(len(expectedOutput)):
+            dCdA[len(dCdA)-1].append(2*(activations[len(activations)-1][i]-expectedOutput[i]))#calculate dC/dA for output layer
+        for i in range(len(self.layers[len(self.layers)-1])):
+            adjustments=[]
+            for j in range(len(self.layers[len(self.layers)-1][i].weights)):
+                adjustments.append(learningRate*activations[len(activations)-2][j]*dAdZ[len(dAdZ)-1][i]*dCdA[len(dCdA)-1][i])#calculate dC/dW for each weight
+            self.layers[len(self.layers)-1][i].addWeightAdjustments(adjustments)#add weight adjustments
+            self.layers[len(self.layers)-1][i].addBiasAdjustment(learningRate*dAdZ[len(dAdZ)-1][i]*dCdA[len(dCdA)-1][i])#add bias adjustment
+
+        #iterate through adjustments for hidden layers
+        for currentLayer in range(len(self.layers)-2,-1,-1):
+            #calculate dC/dA for each neuron
+            for currentNeuron in range(len(self.layers[currentLayer])):
+                temp=0
+                for neuronIndex in range(len(self.layers[currentLayer+1])):
+                    temp+=self.layers[currentLayer+1][neuronIndex].weights[currentNeuron]*dAdZ[currentLayer+2][neuronIndex]*dCdA[currentLayer+1][neuronIndex]
+                dCdA[currentLayer].append(temp)
+            #add adjustments for each neuron
+            for currentNeuron in range(len(self.layers[currentLayer])):
+                adjustments=[]
+                for currentWeight in range(len(self.layers[currentLayer][currentNeuron].weights)):
+                    adjustments.append(learningRate*activations[currentLayer][currentWeight]*dAdZ[currentLayer+1][currentNeuron]*dCdA[currentLayer][currentNeuron])
+                self.layers[currentLayer][currentNeuron].addWeightAdjustments(adjustments)
+                self.layers[currentLayer][currentNeuron].addBiasAdjustment(learningRate*dAdZ[currentLayer+1][currentNeuron]*dCdA[currentLayer][currentNeuron])
+
+    def applyAdjustments(self,count)->None:
+        for layer in self.layers:
+            for neuron in layer:
+                neuron.applyAdjustments(count)
+
 #TODO:
 #-implement backpropagation, layer by layer, from the output layer backwards
-#-iterate over each hidden layer once for every neuron in the next layer (calculate effect on cost via each neuron)
+#for output layer, dC/dA = 2(A-y),where C is the cost, A is the activation value, and y is the desired value
+#dC/dW = dZ/dW * dA/dZ * dC/dA, where Z is the pre-activation value
+#dC/dB = dZ/dB * dA/dZ * dC/dA, where B is the bias
+#dC/dA(L-1) = SUM( dZ(L)/dA(L-1) * dA(L)/dZ(L) * dC/dA(L) ) over layer L, where A(L-1) is the activation of the previous layer, and so on
