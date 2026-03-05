@@ -222,10 +222,3 @@ class NeuralNetwork:
         for layer in self.layers:
             for neuron in layer:
                 neuron.applyAdjustments(count)
-
-#TODO:
-#-implement backpropagation, layer by layer, from the output layer backwards
-#for output layer, dC/dA = 2(A-y),where C is the cost, A is the activation value, and y is the desired value
-#dC/dW = dZ/dW * dA/dZ * dC/dA, where Z is the pre-activation value
-#dC/dB = dZ/dB * dA/dZ * dC/dA, where B is the bias
-#dC/dA(L-1) = SUM( dZ(L)/dA(L-1) * dA(L)/dZ(L) * dC/dA(L) ) over layer L, where A(L-1) is the activation of the previous layer, and so on
