@@ -80,7 +80,7 @@ def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActiva
     structure=[len(storedNN[0].split(";")[0].split(","))-1]
     for layer in storedNN:
         structure.append(len(layer.split(";")))
-    newNN=NeuralNetwork(structure,hiddenActivation,outputActivation,diffHidden,diffOutput)
+    newNN=NeuralNetwork(structure,hiddenActivation,outputActivation,diffHidden=diffHidden,diffOutput=diffOutput)
     newNN.loadParameters(filePath)
     return newNN
 
