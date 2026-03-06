@@ -207,3 +207,4 @@ marimo/_lsp/
 __marimo__/
 
 MNIST/mnist_train.csv
+MNIST/mnist_test.csv
