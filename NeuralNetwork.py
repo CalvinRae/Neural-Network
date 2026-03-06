@@ -32,8 +32,10 @@ def linear(numbers:list[float])->list[float]:
 
 def softmax(numbers:list[float])->list[float]:
     sumExp=0
-    for number in numbers:
-        sumExp+=exp(number)
+    greatest=max(numbers)
+    for i in range(len(numbers)):
+        numbers[i]-=greatest
+        sumExp+=exp(numbers[i])
     output=[]
     for number in numbers:
         output.append(exp(number)/sumExp)
