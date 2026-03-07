@@ -20,10 +20,13 @@ for i in range(len(batch)):
 
 successes=0
 trials=0
+confsum=0
 for inputVector, label in zip(inputVectors,labels):
     output=nn.calculate(inputVector)
     if output.index(max(output))==label:
         successes+=1
+    confsum+=max(output)
     trials+=1
+confidence=100*confsum/len(inputVectors)
 
-print(f"{successes} successes of {trials} trials, % score is {100*successes/trials}")
+print(f"{successes} successes of {trials} trials, % score is {100*successes/trials}, average confidence was {confidence}")
