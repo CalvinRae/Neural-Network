@@ -66,13 +66,16 @@ def leakyReLUDerivative(numbers:list[float])->list[float]:
     return output
 
 def linearDerivative(numbers:list[float]|None=None)->1:
-    return 1
+    return [1]*len(numbers)
 
 def softmaxDerivative(numbers:list[float])->list[float]:
     output=softmax(numbers)
     for i in range(len(output)):
         output[i]=output[i]*(1-output[i])
     return output
+
+def genericBackprop(numbers:list[float]|None=None)->list[float]:
+    return [1]*len(numbers)
     
 def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float], diffHidden:Callable[[list[float]],list[float]]|None=None, diffOutput:Callable[[list[float]],list[float]]|None=None)->NeuralNetwork:
     file=open(filePath,"r")
