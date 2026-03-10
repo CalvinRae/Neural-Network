@@ -2,7 +2,6 @@ import sys
 sys.path.append("../Neural-Network")#import from the parent directory
 from NeuralNetwork import *
 import pandas as pd
-from time import time
 
 nn = fromCSV("MNIST/mnistParameters.csv",leakyReLU,softmax)
 mnistdf=pd.read_csv("MNIST/mnist_test.csv",header=None)
