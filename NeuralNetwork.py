@@ -77,7 +77,7 @@ def softmaxDerivative(numbers:list[float])->list[float]:
 def genericBackprop(numbers:list[float]|None=None)->list[float]:
     return [1]*len(numbers)
     
-def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float], diffHidden:Callable[[list[float]],list[float]]|None=None, diffOutput:Callable[[list[float]],list[float]]|None=None)->NeuralNetwork:
+def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActivation:Callable[[float],float])->NeuralNetwork:
     file=open(filePath,"r")
     storedNN=file.read()
     file.close()
@@ -85,19 +85,17 @@ def fromCSV(filePath:str, hiddenActivation:Callable[[float],float], outputActiva
     structure=[len(storedNN[0].split(";")[0].split(","))-1]
     for layer in storedNN:
         structure.append(len(layer.split(";")))
-    newNN=NeuralNetwork(structure,hiddenActivation,outputActivation,diffHidden=diffHidden,diffOutput=diffOutput)
+    newNN=NeuralNetwork(structure,hiddenActivation,outputActivation)
     newNN.loadParameters(filePath)
     return newNN
 
 class NeuralNetwork:
-    def __init__(self, structure:list[int], hiddenActivation:Callable[[list[float]],list[float]], outputActivation:Callable[[list[float]],list[float]], initialBias:float=0, diffHidden:Callable[[list[float]],list[float]]|None=None, diffOutput:Callable[[list[float]],list[float]]|None=None):
+    def __init__(self, structure:list[int], hiddenActivation:Callable[[list[float]],list[float]], outputActivation:Callable[[list[float]],list[float]], initialBias:float=0):
         #structure is an array containing the number of neurons in each hidden layer
         #hiddenActivation and outputActivation are callables for the activation functions of the hidden and output layers
         #initialBias is a float which will be used as the initial value for the bias of each layer
         self.hiddenActivation=hiddenActivation
         self.outputActivation=outputActivation
-        self.diffHidden=diffHidden
-        self.diffOutput=diffOutput
 
         #construct 2D array, with each array containing the neurons for each layer, the last array containing only the output neurons
         self.layers=[]
@@ -173,26 +171,26 @@ class NeuralNetwork:
                     neuron.bias=neuronParameters.pop()
                     neuron.weights=neuronParameters
 
-    def train(self,inputVector:list[float],expectedOutput:list[float],learningRate:float)->None:
+    def train(self,inputVector:list[float],expectedOutput:list[float],learningRate:float, diffHidden:Callable[[list[float]],list[float]], diffOutput:Callable[[list[float]],list[float]])->None:
         activations, initialValues=self.calculateAll(inputVector)
-        self.addAdjustments(activations,initialValues,expectedOutput,learningRate)
+        self.addAdjustments(activations,initialValues,expectedOutput,learningRate,diffHidden,diffOutput)
         self.applyAdjustments(1)
 
-    def batchTrain(self,inputVectors:list[list[float]],expectedOutputs:list[list[float]],learningRate:float)->None:
+    def batchTrain(self,inputVectors:list[list[float]],expectedOutputs:list[list[float]],learningRate:float, diffHidden:Callable[[list[float]],list[float]], diffOutput:Callable[[list[float]],list[float]])->None:
         for inputVector, expectedOutput in zip(inputVectors,expectedOutputs):
             activations, initialValues=self.calculateAll(inputVector)
-            self.addAdjustments(activations,initialValues,expectedOutput,learningRate)
+            self.addAdjustments(activations,initialValues,expectedOutput,learningRate,diffHidden,diffOutput)
         self.applyAdjustments(len(inputVectors))
         
-    def addAdjustments(self,activations:list[list[float]],initialValues:list[list[float]],expectedOutput:list[float],learningRate:float)->None:
+    def addAdjustments(self,activations:list[list[float]],initialValues:list[list[float]],expectedOutput:list[float],learningRate:float, diffHidden:Callable[[list[float]],list[float]], diffOutput:Callable[[list[float]],list[float]])->None:
         dAdZ=[]#differentiation of each activation function, note that it also includes the input layer
         for layer in initialValues:
             if layer is initialValues[len(initialValues)-1]:
-                dAdZ.append(self.diffOutput(layer))
+                dAdZ.append(diffOutput(layer))
             elif layer is initialValues[0]:
                 dAdZ.append([1]*len(layer))#because for the input layer, dAdZ=1
             else:
-                dAdZ.append(self.diffHidden(layer))
+                dAdZ.append(diffHidden(layer))
         dCdA=[]
         for i in range(len(self.layers)):
             dCdA.append([])
