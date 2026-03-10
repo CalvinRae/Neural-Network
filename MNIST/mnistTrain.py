@@ -4,7 +4,7 @@ from NeuralNetwork import *
 import pandas as pd
 from time import time
 
-nn = fromCSV("MNIST/mnistParameters.csv",leakyReLU,softmax,leakyReLUDerivative,genericBackprop)
+nn = fromCSV("MNIST/mnistParameters.csv",leakyReLU,softmax)
 mnistdf=pd.read_csv("MNIST/mnist_train.csv",header=None)
 lastSaved=time()
 startTime=lastSaved
@@ -28,4 +28,4 @@ while True:
         label=batch.iloc[i,0]
         expectedOutputs[len(expectedOutputs)-1][label]=1
 
-    nn.batchTrain(inputVectors,expectedOutputs,0.1)
+    nn.batchTrain(inputVectors,expectedOutputs,0.1,leakyReLUDerivative,genericBackprop)
