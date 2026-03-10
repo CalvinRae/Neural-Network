@@ -29,4 +29,4 @@ for inputVector, label in zip(inputVectors,labels):
     trials+=1
 confidence=100*confsum/len(inputVectors)
 
-print(f"{successes} successes of {trials} trials, % score is {100*successes/trials}, average confidence was {confidence}")
+print(f"{successes} successes of {trials} trials, % score is {100*successes/trials}, average confidence was {round(confidence,2)}")
